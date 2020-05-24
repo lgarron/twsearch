@@ -58,7 +58,7 @@ struct ioworkitem {
    unsigned int bytecnt ;
 } ;
 struct ioqueue {
-   void init(struct prunetable *pt_, istream *f_ = 0) ;
+   void init(struct prunetable *pt_, ostream *f_ = 0) ;
    void waitthread(int i) ;
    void queuepackwork(ull *mem, ull longcnt,
                         uchar *buf, unsigned int bytecnt) ;
@@ -68,7 +68,7 @@ struct ioqueue {
    int nextthread ;
    struct prunetable *pt ;
    ioworkitem ioworkitems[MAXTHREADS] ;
-   istream *f ;
+   ostream *f ;
 } ;
 extern struct ioqueue ioqueue ;
 struct prunetable {

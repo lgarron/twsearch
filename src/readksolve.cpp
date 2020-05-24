@@ -8,7 +8,7 @@ vector<string> getline(istream *f, ull &checksum) {
    while (1) {
       s.clear() ;
       while (1) {
-         c = getc(f) ;
+         c = f->get();
          if (c != EOF)
             checksum = 31 * checksum + c ;
          if (c == EOF || c == 10 || c == 13) {

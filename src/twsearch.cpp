@@ -1,4 +1,6 @@
 #include <iostream>
+#include <sstream>
+#include <fstream>
 #include <vector>
 #include <cstdlib>
 #include <strings.h>
@@ -63,6 +65,94 @@ int dogod, docanon, doalgo, dosolvetest, dotimingtest, douniq,
     checksolvable, doss, doorderedgs,dosyms ;
 const char *scramblealgo = 0 ;
 const char *legalmovelist = 0 ;
+
+string def3x3x3("# /usr/local/bin/node /Users/rokicki/twizzle/puzzlegeometry/pg.js --optimize --ksolve 3x3x3\
+# PuzzleGeometry 0.1 Copyright 2018 Tomas Rokicki.\
+# c f 0.333333333333333 optimize true\
+\
+# Rotations: 24\
+# Base planes: 6\
+# Face vertices: 4\
+# Boundary is Q[1,1,0,0]\
+# Distances: face 1 edge 1.414213562373095 vertex 1.732050807568877\
+# Faces is now 9\
+# Short edge is 0.6666666666666659\
+# Total stickers is now 54\
+# Move plane sets: 2,2,2\
+# Cubies: 26\
+# Cubie orbit sizes 6,12,8\
+# PuzzleGeometry 0.1 Copyright 2018 Tomas Rokicki.\
+# c f 0.333333333333333 optimize true\
+Name PuzzleGeometryPuzzle\
+\
+Set EDGE 12 2\
+Set CORNER 8 3\
+\
+Solved\
+EDGE\
+1 2 3 4 5 6 7 8 9 10 11 12\
+0 0 0 0 0 0 0 0 0 0 0 0\
+CORNER\
+1 2 3 4 5 6 7 8\
+0 0 0 0 0 0 0 0\
+End\
+\
+Move F\
+EDGE\
+10 1 3 4 2 6 7 8 9 5 11 12\
+1 1 0 0 1 0 0 0 0 1 0 0\
+CORNER\
+7 1 3 2 5 6 4 8\
+2 1 0 2 0 0 1 0\
+End\
+\
+Move B\
+EDGE\
+1 2 6 4 5 7 11 8 9 10 3 12\
+0 0 1 0 0 1 1 0 0 0 1 0\
+CORNER\
+1 2 5 4 8 3 7 6\
+0 0 1 0 2 2 0 1\
+End\
+\
+Move D\
+EDGE\
+1 9 3 2 5 4 7 8 6 10 11 12\
+0 0 0 0 0 0 0 0 0 0 0 0\
+CORNER\
+1 4 3 8 2 6 7 5\
+0 0 0 0 0 0 0 0\
+End\
+\
+Move U\
+EDGE\
+1 2 3 4 5 6 7 11 9 8 12 10\
+0 0 0 0 0 0 0 0 0 0 0 0\
+CORNER\
+3 2 6 4 5 7 1 8\
+0 0 0 0 0 0 0 0\
+End\
+\
+Move L\
+EDGE\
+1 2 3 4 12 6 9 8 5 10 11 7\
+0 0 0 0 0 0 0 0 0 0 0 0\
+CORNER\
+1 2 3 7 5 8 6 4\
+0 0 0 1 0 1 2 2\
+End\
+\
+Move R\
+EDGE\
+4 2 8 3 5 6 7 1 9 10 11 12\
+0 0 0 0 0 0 0 0 0 0 0 0\
+CORNER\
+2 5 1 4 3 6 7 8\
+1 2 2 0 1 0 0 0\
+End\
+\
+");
+
 int main(int argc, const char **argv) {
    int seed = 0 ;
    int forcearray = 0 ;
@@ -229,9 +319,11 @@ default:
       srand48(time(0)) ;
    if (argc <= 1)
       error("! please provide a twsearch file name on the command line") ;
-   istream *f = fopen(argv[1], "r") ;
-   if (f == 0)
-      error("! could not open file ", argv[1]) ;
+   // istringstream f(def3x3x3);
+   ifstream f;
+   f.open(argv[1], ifstream::in);
+   // if (f == 0)
+      // error("! could not open file ", argv[1]) ;
    int sawdot = 0 ;
    for (int i=0; argv[1][i]; i++) {
       if (argv[1][i] == '.')
@@ -242,7 +334,7 @@ default:
       } else if (!sawdot)
          inputbasename.push_back(argv[1][i]) ;
    }
-   puzdef pd = readdef(f) ;
+   puzdef pd = readdef(&f) ;
    addmovepowers(pd) ;
    if (legalmovelist)
       filtermovelist(pd, legalmovelist) ;
@@ -327,19 +419,22 @@ default:
          for (int i=0; i<(int)movelist.size(); i++)
             domove(pd, scr, movelist[i]) ;
       } else {
-         f = fopen(argv[2], "r") ;
-         if (f == 0)
-            error("! could not open scramble file ", argv[2]) ;
-         readfirstscramble(f, pd, scr) ;
-         fclose(f) ;
+         ifstream scrambles;
+         scrambles.open(argv[2], ifstream::in);
+         // if (f == 0)
+         //    error("! could not open scramble file ", argv[2]) ;
+         readfirstscramble(&scrambles, pd, scr) ;
+         scrambles.close();
       }
       prunetable pt(pd, maxmem) ;
       processlines2(pd, [&](const puzdef &pd, setval p1sol, const char *p1str) {
                                dophase2(pd, scr, p1sol, pt, p1str); }) ;
    } else if (argc > 2) {
-      f = fopen(argv[2], "r") ;
-      if (f == 0)
-         error("! could not open scramble file ", argv[2]) ;
-      processscrambles(f, pd) ;
+         ifstream scrambles;
+         scrambles.open(argv[2], ifstream::in);
+      // if (f == 0)
+         // error("! could not open scramble file ", argv[2]) ;
+      processscrambles(&scrambles, pd) ;
+      scrambles.close();
    }
 }

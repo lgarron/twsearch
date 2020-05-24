@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <set>
 #include "prunetable.h"
 #include "city.h"
@@ -134,7 +135,7 @@ ull fillworker::filltable(const puzdef &pd, prunetable &pt, int togo,
    }
    return r ;
 }
-void ioqueue::init(struct prunetable *pt_, istream *f_) {
+void ioqueue::init(struct prunetable *pt_, ostream *f_) {
    pt = pt_ ;
    f = f_ ;
    for (int i=0; i<numthreads; i++)
@@ -148,16 +149,15 @@ void ioqueue::waitthread(int i) {
    if (ioworkitems[i].state == 2) {
       unsigned int bytecnt = ioworkitems[i].bytecnt ;
       unsigned int longcnt = ioworkitems[i].longcnt ;
-      putc(bytecnt & 255, f) ;
-      putc((bytecnt >> 8) & 255, f) ;
-      putc((bytecnt >> 16) & 255, f) ;
-      putc((bytecnt >> 24) & 255, f) ;
-      putc(longcnt & 255, f) ;
-      putc((longcnt >> 8) & 255, f) ;
-      putc((longcnt >> 16) & 255, f) ;
-      putc((longcnt >> 24) & 255, f) ;
-      if (fwrite(ioworkitems[i].buf, 1, bytecnt, f) != bytecnt)
-         error("! I/O error writing block") ;
+      f->put(bytecnt & 255) ;
+      f->put((bytecnt >> 8) & 255) ;
+      f->put((bytecnt >> 16) & 255) ;
+      f->put((bytecnt >> 24) & 255) ;
+      f->put(longcnt & 255) ;
+      f->put((longcnt >> 8) & 255) ;
+      f->put((longcnt >> 16) & 255) ;
+      f->put((longcnt >> 24) & 255) ;
+      f->write((char *)ioworkitems[i].buf, bytecnt);
       free(ioworkitems[i].buf) ;
    }
 }
@@ -440,19 +440,18 @@ void prunetable::writeblock(ull *mem, ull longcnt) {
 }
 void prunetable::readblock(ull *mem, ull explongcnt, istream *f) {
    unsigned int bytecnt, longcnt ;
-   bytecnt = getc(f) ;
-   bytecnt += getc(f) << 8 ;
-   bytecnt += getc(f) << 16 ;
-   bytecnt += getc(f) << 24 ;
-   longcnt = getc(f) ;
-   longcnt += getc(f) << 8 ;
-   longcnt += getc(f) << 16 ;
-   longcnt += getc(f) << 24 ;
+   bytecnt = f->get() ;
+   bytecnt += f->get() << 8 ;
+   bytecnt += f->get() << 16 ;
+   bytecnt += f->get() << 24 ;
+   longcnt = f->get() ;
+   longcnt += f->get() << 8 ;
+   longcnt += f->get() << 16 ;
+   longcnt += f->get() << 24 ;
    if (longcnt != explongcnt || bytecnt <= 0 || bytecnt > 32 * BLOCKSIZE)
       error("! I/O error while reading block") ;
    uchar *buf = (uchar *)malloc(bytecnt) ;
-   if (fread(buf, 1, bytecnt, f) != bytecnt)
-      error("! I/O error while reading block") ;
+   f->read((char *)buf, bytecnt);
    ioqueue.queueunpackwork(mem, longcnt, buf, bytecnt) ;
 }
 #ifndef WASM
@@ -548,30 +547,29 @@ void prunetable::writept(const puzdef &pd) {
       }
    string filename = makefilename(pd) ;
    cout << "Writing " << filename << " " << flush ;
-   istream *w = fopen(filename.c_str(), "wb") ;
-   if (w == 0)
-      error("! can't open filename") ;
-   if (putc(SIGNATURE, w) < 0)
-      error("! I/O error") ;
-   fwrite(&pd.checksum, sizeof(pd.checksum), 1, w) ;
-   fwrite(&size, sizeof(size), 1, w) ;
-   fwrite(&hmask, sizeof(hmask), 1, w) ;
-   fwrite(&popped, sizeof(popped), 1, w) ;
-   fwrite(&totpop, sizeof(totpop), 1, w) ;
-   fwrite(&fillcnt, sizeof(fillcnt), 1, w) ;
-   fwrite(&totsize, sizeof(totsize), 1, w) ;
-   fwrite(&baseval, sizeof(baseval), 1, w) ;
-   fwrite(&hibase, sizeof(hibase), 1, w) ;
-   fwrite(codewidths, sizeof(codewidths[0]), 256, w) ;
+   ofstream w;
+   // do stuff
+   w.open(filename, ios::out | ios::trunc) ;
+   w.put(SIGNATURE);
+   w.write((char *)&pd.checksum, sizeof(pd.checksum)) ;
+   w.write((char *)&size, sizeof(size)) ;
+   w.write((char *)&hmask, sizeof(hmask)) ;
+   w.write((char *)&popped, sizeof(popped)) ;
+   w.write((char *)&totpop, sizeof(totpop)) ;
+   w.write((char *)&fillcnt, sizeof(fillcnt)) ;
+   w.write((char *)&totsize, sizeof(totsize)) ;
+   w.write((char *)&baseval, sizeof(baseval)) ;
+   w.write((char *)&hibase, sizeof(hibase)) ;
+   w.write((char *)codewidths, sizeof(codewidths[0]) * 256) ;
    if (longcnt % BLOCKSIZE != 0)
       error("Size must be a multiple of block size") ;
-   ioqueue.init(this, w) ;
+   ioqueue.init(this, &w) ;
    for (ll i=0; i<longcnt; i += BLOCKSIZE)
       writeblock(mem+i, BLOCKSIZE) ;
    ioqueue.finishall() ;
-   if (putc(SIGNATURE, w) < 0)
-      error("! I/O error") ;
-   fclose(w) ;
+   w.put(SIGNATURE);
+      // error("! I/O error") ;
+   w.close() ;
    cout << "written in " << duration() << endl << flush ;
 }
 int prunetable::readpt(const puzdef &pd) {
@@ -580,45 +578,46 @@ int prunetable::readpt(const puzdef &pd) {
       codevals[i] = 0 ;
    }
    string filename = makefilename(pd) ;
-   istream *r = fopen(filename.c_str(), "rb") ;
-   if (r == 0)
-      return 0 ;
+   ifstream r;
+   r.open(filename, ifstream::in);
+   // if (r == 0)
+   //    return 0 ;
    cout << "Reading " << filename << " " << flush ;
-   if (getc(r) != SIGNATURE) {
+   if (r.get() != SIGNATURE) {
       warn("! first byte not signature") ;
       return 0 ;
    }
    ull checksum = 0 ;
-   if (fread(&checksum, sizeof(checksum), 1, r) < 1)
-      error("! I/O error reading pruning table") ;
+   r.read((char *)&checksum, sizeof(checksum));
+      // error("! I/O error reading pruning table") ;
    if (checksum != pd.checksum) {
       cout <<
  "Puzzle definition appears to have changed; recreating pruning table" << endl ;
-      fclose(r) ;
+      r.close() ;
       return 0 ;
    }
    ull temp = 0 ;
-   if (fread(&temp, sizeof(temp), 1, r) != 1)
-      error("! I/O error in reading pruning table") ;
-   if (temp != size) {
-      cout <<
- "Pruning table size is different; recreating pruning table" << endl ;
-      fclose(r) ;
-      return 0 ;
-   }
-   if (fread(&hmask, sizeof(hmask), 1, r) < 1 ||
-       fread(&popped, sizeof(popped), 1, r) < 1 ||
-       fread(&totpop, sizeof(totpop), 1, r) < 1 ||
-       fread(&fillcnt, sizeof(fillcnt), 1, r) < 1 ||
-       fread(&totsize, sizeof(totsize), 1, r) < 1 ||
-       fread(&baseval, sizeof(baseval), 1, r) < 1 ||
-       fread(&hibase, sizeof(hibase), 1, r) < 1)
-      error("! I/O error reading pruning table") ;
-   if (fread(codewidths, sizeof(codewidths[0]), 256, r) != 256) {
-      warn("I/O error in reading pruning table") ;
-      fclose(r) ;
-      return 0 ;
-   }
+   r.read((char *)&temp, sizeof(temp));
+      // error("! I/O error in reading pruning table") ;
+//    if (temp != size) {
+//       cout <<
+//  "Pruning table size is different; recreating pruning table" << endl ;
+//       r.close() ;
+//       return 0 ;
+//    }
+   r.read((char *)&hmask, sizeof(hmask));
+   r.read((char *)&popped, sizeof(popped));
+   r.read((char *)&totpop, sizeof(totpop));
+   r.read((char *)&fillcnt, sizeof(fillcnt));
+   r.read((char *)&totsize, sizeof(totsize));
+   r.read((char *)&baseval, sizeof(baseval));
+   r.read((char *)&hibase, sizeof(hibase));
+      // error("! I/O error reading pruning table") ;
+   r.read((char *)codewidths, sizeof(codewidths[0]) * 256);
+   //    warn("I/O error in reading pruning table") ;
+   //    fclose(r) ;
+   //    return 0 ;
+   // }
    int widthcounts[64] ;
    for (int i=0; i<64; i++)
       widthcounts[i] = 0 ;
@@ -688,12 +687,12 @@ int prunetable::readpt(const puzdef &pd) {
       error("! when reading, expected multiple of longcnt") ;
    ioqueue.init(this) ;
    for (ll i=0; i<longcnt; i += BLOCKSIZE)
-      readblock(mem+i, BLOCKSIZE, r) ;
+      readblock(mem+i, BLOCKSIZE, &r) ;
    ioqueue.finishall() ;
-   int tv = getc(r) ;
+   int tv = r.get() ;
    if (tv != SIGNATURE)
       error("! I/O error reading final signature") ;
-   fclose(r) ;
+   r.close() ;
    cout << "read in " << duration() << endl << flush ;
    justread = 1 ;
    return 1 ;
