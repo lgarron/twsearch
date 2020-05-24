@@ -229,7 +229,7 @@ default:
       srand48(time(0)) ;
    if (argc <= 1)
       error("! please provide a twsearch file name on the command line") ;
-   FILE *f = fopen(argv[1], "r") ;
+   istream *f = fopen(argv[1], "r") ;
    if (f == 0)
       error("! could not open file ", argv[1]) ;
    int sawdot = 0 ;

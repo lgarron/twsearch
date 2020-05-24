@@ -134,7 +134,7 @@ ull fillworker::filltable(const puzdef &pd, prunetable &pt, int togo,
    }
    return r ;
 }
-void ioqueue::init(struct prunetable *pt_, FILE *f_) {
+void ioqueue::init(struct prunetable *pt_, istream *f_) {
    pt = pt_ ;
    f = f_ ;
    for (int i=0; i<numthreads; i++)
@@ -438,7 +438,7 @@ void prunetable::writeblock(ull *mem, ull longcnt) {
    uchar *buf = (uchar *)malloc(bytecnt) ;
    ioqueue.queuepackwork(mem, longcnt, buf, bytecnt) ;
 }
-void prunetable::readblock(ull *mem, ull explongcnt, FILE *f) {
+void prunetable::readblock(ull *mem, ull explongcnt, istream *f) {
    unsigned int bytecnt, longcnt ;
    bytecnt = getc(f) ;
    bytecnt += getc(f) << 8 ;
@@ -548,7 +548,7 @@ void prunetable::writept(const puzdef &pd) {
       }
    string filename = makefilename(pd) ;
    cout << "Writing " << filename << " " << flush ;
-   FILE *w = fopen(filename.c_str(), "wb") ;
+   istream *w = fopen(filename.c_str(), "wb") ;
    if (w == 0)
       error("! can't open filename") ;
    if (putc(SIGNATURE, w) < 0)
@@ -580,7 +580,7 @@ int prunetable::readpt(const puzdef &pd) {
       codevals[i] = 0 ;
    }
    string filename = makefilename(pd) ;
-   FILE *r = fopen(filename.c_str(), "rb") ;
+   istream *r = fopen(filename.c_str(), "rb") ;
    if (r == 0)
       return 0 ;
    cout << "Reading " << filename << " " << flush ;
