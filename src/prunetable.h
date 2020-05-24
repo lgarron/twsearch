@@ -106,8 +106,10 @@ struct prunetable {
    void unpackblock(ull *mem, ull longcnt, uchar *block, int bytecnt) ;
    void writeblock(ull *mem, ull longcnt) ;
    void readblock(ull *mem, ull explongcnt, FILE *f) ;
+#ifndef WASM
    void writept(const puzdef &pd) ;
    int readpt(const puzdef &pd) ;
+#endif
    ull size, hmask, popped, totpop ;
    ull lookupcnt ;
    ull fillcnt ;

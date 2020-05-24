@@ -233,6 +233,7 @@ prunetable::prunetable(const puzdef &pd, ull maxmem) {
    fillcnt = 0 ;
    hibase = base ;
    justread = 0 ;
+#ifndef WASM
    if (!readpt(pd)) {
       memset(mem, -1, bytesize) ;
       baseval = min(hibase, 2) ;
@@ -246,6 +247,7 @@ prunetable::prunetable(const puzdef &pd, ull maxmem) {
       }
    }
    writept(pd) ;
+#endif
 }
 void prunetable::filltable(const puzdef &pd, int d) {
    popped = 0 ;
@@ -300,7 +302,9 @@ void prunetable::checkextend(const puzdef &pd) {
    wval = 2 ;
    wbval = min(15, baseval+1) ;
    filltable(pd, baseval+1) ;
+#ifndef WASM
    writept(pd) ;
+#endif
 }
 // if someone set options that affect the hash, we add a suffix to the
 // data file name to reflect this.
@@ -451,6 +455,7 @@ void prunetable::readblock(ull *mem, ull explongcnt, FILE *f) {
       error("! I/O error while reading block") ;
    ioqueue.queueunpackwork(mem, longcnt, buf, bytecnt) ;
 }
+#ifndef WASM
 void prunetable::writept(const puzdef &pd) {
    // only write the table if at least 1 in 100 elements has a value
    if (nowrite || justread || fillcnt * 100 < size)
@@ -693,5 +698,6 @@ int prunetable::readpt(const puzdef &pd) {
    justread = 1 ;
    return 1 ;
 }
+#endif
 void *unpackworker(void *o) ;
 void *packworker(void *o) ;
