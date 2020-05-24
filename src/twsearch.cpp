@@ -321,7 +321,9 @@ default:
       error("! please provide a twsearch file name on the command line") ;
    // istringstream f(def3x3x3);
    ifstream f;
+#ifndef WASM
    f.open(argv[1], ifstream::in);
+#endif
    // if (f == 0)
       // error("! could not open file ", argv[1]) ;
    int sawdot = 0 ;
@@ -420,21 +422,29 @@ default:
             domove(pd, scr, movelist[i]) ;
       } else {
          ifstream scrambles;
+#ifndef WASM
          scrambles.open(argv[2], ifstream::in);
+#endif
          // if (f == 0)
          //    error("! could not open scramble file ", argv[2]) ;
          readfirstscramble(&scrambles, pd, scr) ;
+#ifndef WASM
          scrambles.close();
+#endif
       }
       prunetable pt(pd, maxmem) ;
       processlines2(pd, [&](const puzdef &pd, setval p1sol, const char *p1str) {
                                dophase2(pd, scr, p1sol, pt, p1str); }) ;
    } else if (argc > 2) {
          ifstream scrambles;
+#ifndef WASM
          scrambles.open(argv[2], ifstream::in);
+#endif
       // if (f == 0)
          // error("! could not open scramble file ", argv[2]) ;
       processscrambles(&scrambles, pd) ;
+#ifndef WASM
       scrambles.close();
+#endif
    }
 }

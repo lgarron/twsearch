@@ -569,7 +569,9 @@ void prunetable::writept(const puzdef &pd) {
    ioqueue.finishall() ;
    w.put(SIGNATURE);
       // error("! I/O error") ;
+#ifndef WASM
    w.close() ;
+#endif
    cout << "written in " << duration() << endl << flush ;
 }
 int prunetable::readpt(const puzdef &pd) {
@@ -593,7 +595,9 @@ int prunetable::readpt(const puzdef &pd) {
    if (checksum != pd.checksum) {
       cout <<
  "Puzzle definition appears to have changed; recreating pruning table" << endl ;
+#ifndef WASM
       r.close() ;
+#endif
       return 0 ;
    }
    ull temp = 0 ;
@@ -692,7 +696,9 @@ int prunetable::readpt(const puzdef &pd) {
    int tv = r.get() ;
    if (tv != SIGNATURE)
       error("! I/O error reading final signature") ;
+#ifndef WASM
    r.close() ;
+#endif
    cout << "read in " << duration() << endl << flush ;
    justread = 1 ;
    return 1 ;
