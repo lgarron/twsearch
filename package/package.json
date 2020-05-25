@@ -1,0 +1,18 @@
+{
+  "name": "twsearch",
+  "version": "0.0.1",
+  "description": "Twisty Puzzle searcher.  Much like ksolve but, due to licensing issues on that program, we have coded it completely from scratch.  We start from a base of compatibility but do not guarantee it.",
+  "main": "dist/index.js",
+  "dependencies": {
+    "parcel": "^2.0.0-nightly.275"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lgarron/twsearch.git"
+  },
+  "bugs": {
+    "url": "https://github.com/lgarron/twsearch/issues"
+  },
+  "homepage": "https://github.com/lgarron/twsearch#readme"
+}

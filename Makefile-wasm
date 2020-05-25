@@ -1,6 +1,14 @@
-all: js/twsearch.js
+all: package/src/generated/twsearch.mjs
 
-CXX = emcc
+.PHONY: emsdk
+emsdk:
+	mkdir -p emsdk
+	cd emsdk && git clone https://github.com/emscripten-core/emsdk.git .
+	./emsdk/emsdk install latest-upstream
+	./emsdk/emsdk activate latest-upstream
+
+# CXX = ./emsdk/upstream/emscripten/em++
+CXX = em++
 CXXFLAGS = -O3 -Wextra -Wall -pedantic -std=c++14 -g -march=native -Wsign-compare
 FLAGS = -s ALLOW_MEMORY_GROWTH=1 -DHAVE_FFSLL -Isrc -Isrc/cityhash/src
 LDFLAGS =
@@ -20,5 +28,25 @@ HSOURCE = src/antipode.h src/calcsymm.h src/canon.h src/cmdlineops.h \
 
 CITYSRC = src/cityhash/src/city.cc
 
-js/twsearch.js: $(CSOURCE) $(HSOURCE)
-	$(CXX) $(CXXFLAGS) $(FLAGS) -o js/twsearch.js $(CSOURCE) $(CITYSRC) $(LDFLAGS)
+package/src/generated/twsearch.mjs: $(CSOURCE) $(HSOURCE)
+	mkdir -p package/src/generated
+	$(CXX) $(CXXFLAGS) $(FLAGS) -o $@.temp.mjs $(CSOURCE) $(CITYSRC) $(LDFLAGS)
+	sed -i "" 's#^..*_scriptDir.*import.meta.url.*#var _scriptDir = "./"#' $@.temp.mjs
+	sed -i "" 's#^var wasmBinaryFile =.*##' $@.temp.mjs
+	sed -i "" 's#^if.*isDataURI.*wasmBinaryFile.*#if (false) {#' $@.temp.mjs
+	echo 'import wasmBinaryFile from "url:./twsearch.wasm"' > $@
+	cat $@.temp.mjs >> $@
+	mv $@.temp.wasm package/src/generated/twsearch.wasm
+	rm $@.temp.mjs
+
+.PHONY: setup
+setup:
+	cd package && npm install
+
+.PHONY: dev
+dev: package/src/generated/twsearch.mjs
+	cd package && npx parcel src/index.html
+
+.PHONY: clean
+clean:
+	rm -rf ./package/src/generated/twsearch.mjs ./.cache ./.parcel-cache
