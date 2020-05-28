@@ -13,9 +13,13 @@ ll maxmem = 8LL * 1024LL * 1024LL * 1024LL ;
 #endif
 int quarter ;
 double walltime() {
+#ifdef WASM
+   return 0;
+#else
    struct timeval tv ;
    gettimeofday(&tv, 0) ;
    return tv.tv_sec + 0.000001 * tv.tv_usec ;
+#endif
 }
 double duration() {
    double now = walltime() ;

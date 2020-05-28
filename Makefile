@@ -1,7 +1,9 @@
-all: twsearch
+default: twsearch
+
+all: twsearch package/src/generated/twsearch.wasm
 
 CXXFLAGS = -O3 -Wextra -Wall -pedantic -std=c++14 -g -march=native -Wsign-compare
-FLAGS = -DUSE_PTHREADS -DHAVE_FFSLL -Isrc -Isrc/cityhash/src
+COMMON_FLAGS = -DHAVE_FFSLL -Isrc -Isrc/cityhash/src
 LDFLAGS = -lpthread
 
 CSOURCE = src/antipode.cpp src/calcsymm.cpp src/canon.cpp src/cmdlineops.cpp \
@@ -19,5 +21,24 @@ HSOURCE = src/antipode.h src/calcsymm.h src/canon.h src/cmdlineops.h \
 
 CITYSRC = src/cityhash/src/city.cc
 
+BINARY_FLAGS = $(COMMON_FLAGS) -DUSE_PTHREADS
 twsearch: $(CSOURCE) $(HSOURCE)
-	$(CXX) $(CXXFLAGS) $(FLAGS) -o twsearch $(CSOURCE) $(CITYSRC) $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) $(BINARY_FLAGS) -o twsearch $(CSOURCE) $(CITYSRC) $(LDFLAGS)
+
+package/src/generated/twsearch.wasm: $(CSOURCE) $(HSOURCE)
+	mkdir -p package/src/generated
+	em++ $(WASM_CXX) $(CXXFLAGS) $(COMMON_FLAGS) \
+		 -fno-exceptions -DWASM -DASLIBRARY \
+		 -o $@ $(CSOURCE) $(CITYSRC)
+
+package/src/generated/wasmtest.wasm: $(CSOURCE) $(HSOURCE)
+	mkdir -p package/src/generated
+	wasic++ $(WASM_CXX) $(CXXFLAGS) $(COMMON_FLAGS) \
+		 -fno-exceptions -DWASM -DASLIBRARY -DWASMTEST \
+		 -o $@ $(CSOURCE) $(CITYSRC)
+
+clean:
+	rm -f \
+		./twsearch \
+		./package/src/generated/twsearch.wasm \
+		./package/src/generated/wasmtest.wasm

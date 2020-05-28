@@ -9,11 +9,19 @@
 #include "twsearch.h"
 #include "parsemoves.h"
 #include "cmdlineops.h"
+
+#ifdef EMSCRIPTEN
+#include <emscripten.h>
+#else
+#define EMSCRIPTEN_KEEPALIVE
+#endif
+
 struct wasmdata {
    puzdef pd ;
    prunetable pt ;
    int havepd, havept ;
 } wasmdata ;
+EMSCRIPTEN_KEEPALIVE
 extern "C" void w_args(const char *s_) {
    string s(s_) ;
    const char *argva[4] ;
@@ -49,11 +57,13 @@ void checkprunetable() {
       wasmdata.havept = 1 ;
    }
 }
+EMSCRIPTEN_KEEPALIVE
 extern "C" void w_setksolve(const char *s_) {
    string s(s_) ;
    wasmdata.pd = makepuzdef(s) ;
    wasmdata.havepd = 1 ;
 }
+EMSCRIPTEN_KEEPALIVE
 extern "C" const char *w_solvescramble(const char *s) {
    lastsolution = "--no solution--" ;
    checkprunetable() ;
@@ -66,6 +76,7 @@ extern "C" const char *w_solvescramble(const char *s) {
    solveit(pd, wasmdata.pt, noname, p1) ;
    return lastsolution.c_str() ;
 }
+EMSCRIPTEN_KEEPALIVE
 extern "C" const char *w_solveposition(const char *s) {
    lastsolution = "--no solution--" ;
    checkprunetable() ;

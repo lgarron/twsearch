@@ -66,8 +66,13 @@ void doinit() {
       init_threads() ;
       if (seed)
          srand48(seed) ;
-      else
+      else {
+#ifdef WASM
+         srand48(12345) ;
+#else
          srand48(time(0)) ;
+#endif
+      }
       initialized = 1 ;
    }
 }
