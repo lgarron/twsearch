@@ -1,23 +1,24 @@
-// We need to use the default import due to `node` limitations.
-// @ts-nocheck
-import {w_args, w_setksolve, w_solvescramble, w_solveposition} from "./wasm/generated/twsearch-wrapper"
-import {KPuzzle} from "cubing/kpuzzle";
+import {wrap} from "comlink"
+import { TwSearchWorker, TwSearchWorkerConstructor } from "./worker-impl";
 
-// Theoretically, we should avoid any other calls to the twsearch API until this
-// async call has returned. However, we know that the generated `twsearch.js`
-// has all the functions waiting on  the same initialization Promise. Since JS is
-// single-threaded, we can be guaranteed that this call finishes before
-// anything below.
-w_args("--nowrite");
+export class TwSearch {
+  private worker: TwSearchWorker;
+  constructor() {
+    const twsearchWorkerConstructor = wrap(
+      new Worker("./worker-impl.ts")
+    ) as any as TwSearchWorkerConstructor;
+    this.worker = new twsearchWorkerConstructor();
+  }
 
-export async function setKPuzzle(def) {
-  await w_setksolve(def);
-}
+  async setKPuzzle(def) {
+    await (await this.worker).setKPuzzle(def);
+  }
 
-export async function solveScramble(scramble) {
-  return await w_solvescramble(scramble);
-}
+  async solveScramble(scramble) {
+    return await (await this.worker).solveScramble(scramble);
+  }
 
-export async function solveState(state) {
-  return await w_solveposition(state);
+  async solveState(state) {
+    return await (await this.worker).solveState(state);
+  }
 }

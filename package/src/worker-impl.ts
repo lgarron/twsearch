@@ -11,7 +11,7 @@ import {expose} from "comlink";
 // anything below.
 w_args("--nowrite");
 
-export class TwSearch {
+export class TwSearchWorker {
   async setKPuzzle(def) {
     await w_setksolve(def);
   }
@@ -25,8 +25,8 @@ export class TwSearch {
   }
 }
 
-expose(TwSearch)
+expose(TwSearchWorker)
 
-export interface TwSearchConstructor {
-  new(): TwSearch
+export interface TwSearchWorkerConstructor {
+  new(): TwSearchWorker
 }
