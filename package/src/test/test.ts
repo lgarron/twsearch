@@ -1,4 +1,5 @@
 import {setKPuzzle, solveScramble, solveState} from "../twsearch"
+import { algCubingNetLink, parse } from "cubing/alg";
 
 const twsfile = `Name PuzzleGeometryPuzzle
 
@@ -54,8 +55,28 @@ CORNER
 End
 `;
 
-(async () => {
-  await setKPuzzle(twsfile);
-  console.log(await solveScramble("U F R D B L U F R D B L U F R D B L"));
-  console.log(await solveState(scrfile));
-})();
+setKPuzzle(twsfile);
+
+window.addEventListener("DOMContentLoaded", () => {
+  const scrambleField = document.querySelector("#scramble") as HTMLInputElement;
+  const solveButton = document.querySelector("#solve") as HTMLButtonElement;
+  const solutionField = document.querySelector("#solution") as HTMLInputElement;
+  const viewLink = document.querySelector("#view") as HTMLAnchorElement;
+  solveButton.addEventListener("click", async () => {
+    const scramble = scrambleField.value;
+
+    solutionField.value = "";
+    solutionField.classList.add("solving");
+    viewLink.hidden = true;
+
+    const solution = await solveScramble(scramble);
+    solutionField.value = solution;
+
+    solutionField.classList.remove("solving");
+    viewLink.href = algCubingNetLink({
+      setup: parse(scramble),
+      alg: parse(solution)
+    })
+    viewLink.hidden = false;
+  })
+})

@@ -9,3 +9,10 @@ wasm:
 
 node_modules:
 	npm install
+
+.PHONY: clean
+clean:
+	rm -rf \
+		src/wasm/generated/twsearch-wrapper.js \
+		.cache \
+		.parcel-cache

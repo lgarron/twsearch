@@ -1,8 +1,32 @@
 <script src="./test.ts" defer></script>
 
-<button id="wasmtest-barebones">wasic++ wasmtest (barebones WASI)</button><br><br>
-<button id="wasmtest-stub">wasic++ wasmtest (stub WASI)</button><br><br>
-<button id="wasmtest-wasmer" disabled>wasic++ wasmtest (wasmer WASI)</button><br><br>
-<button id="twsearch-barebones">em++ twsearch (barebones WASI)</button><br><br>
-<button id="twsearch-stub">em++ twsearch (stub WASI)</button><br><br>
-<button id="twsearch-wasmer" disabled>em++ twsearch (wasmer WASI)</button><br><br>
+<style>
+input {
+  width: 30em;
+  max-width: 100%;
+  margin-bottom: 0.5em;
+}
+#solution.solving {
+  background-image: 
+    repeating-linear-gradient(
+      -45deg, 
+      transparent, 
+      transparent 1em,
+      rgba(0, 63, 255, 0.25) 1em,
+      rgba(0, 63, 255, 0.25) 2em
+    );
+  background-size: 200% 200%;
+  animation: solving 5s linear infinite;
+}
+
+@keyframes solving {
+  100% {
+    background-position: -100% 100%;
+  }
+}
+</style>
+
+<input id="scramble" value="B' U2 R2 B' D2 F2 D2 F L2 U2 R2 F R U B D R D2 F U' B'">
+<button id="solve">Solve</button><br>
+<input id="solution">
+<a href="#" id="view" target="_blank" hidden>View</a>
