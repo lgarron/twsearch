@@ -1,4 +1,4 @@
-import { instantiateBarebones, instantiateStub, instantiateWasmerAndRunMain } from "../instantiate";
+import { instantiateBarebones, instantiateStub } from "../instantiate";
 import { TwSearch } from "../twsearch";
 import { twsearchBytes, wasmtestBytes } from "../wasm-bytes";
 

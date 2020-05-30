@@ -1,6 +1,6 @@
 default: twsearch
 
-all: twsearch package/src/generated/twsearch.wasm
+all: twsearch package/src/generated/js/twsearch.js
 
 CXXFLAGS = -O3 -Wextra -Wall -pedantic -std=c++14 -g -march=native -Wsign-compare
 COMMON_FLAGS = -DHAVE_FFSLL -Isrc -Isrc/cityhash/src
@@ -25,9 +25,10 @@ BINARY_FLAGS = $(COMMON_FLAGS) -DUSE_PTHREADS
 twsearch: $(CSOURCE) $(HSOURCE)
 	$(CXX) $(CXXFLAGS) $(BINARY_FLAGS) -o twsearch $(CSOURCE) $(CITYSRC) $(LDFLAGS)
 
-package/src/generated/twsearch.wasm: $(CSOURCE) $(HSOURCE)
-	mkdir -p package/src/generated
+package/src/generated/js/twsearch.js: $(CSOURCE) $(HSOURCE)
+	mkdir -p package/src/generated/js
 	em++ $(WASM_CXX) $(CXXFLAGS) $(COMMON_FLAGS) \
+		-s ALLOW_MEMORY_GROWTH=1 \
 		 -fno-exceptions -DWASM -DASLIBRARY \
 		 -o $@ $(CSOURCE) $(CITYSRC)
 
@@ -40,5 +41,6 @@ package/src/generated/wasmtest.wasm: $(CSOURCE) $(HSOURCE)
 clean:
 	rm -f \
 		./twsearch \
+		./package/src/generated/js/twsearch.js \
 		./package/src/generated/twsearch.wasm \
 		./package/src/generated/wasmtest.wasm
