@@ -1,3 +1,4 @@
+import "babel-polyfill";
 import { TwSearch } from "../twsearch";
 import { algCubingNetLink, parse } from "cubing/alg";
 
