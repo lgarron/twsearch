@@ -1,5 +1,7 @@
-import { setKPuzzle, solveScramble, solveState } from "../twsearch";
+import { constructor } from "../worker-wrapper";
 import { algCubingNetLink, parse } from "cubing/alg";
+
+const worker = new constructor();
 
 const lastDefinition = "";
 const definitionField = document.querySelector(
@@ -36,19 +38,18 @@ class SolverSection {
   async onStartSolve(): Promise<void> {
     const def = definitionField.value;
     if (def != lastDefinition) {
-      await setKPuzzle(def);
+      await (await worker).setKPuzzle(def);
     }
     this.currentToSolve = this.toSolveField.value;
-    console.log(this.section.offsetWidth);
     this.startedSolving();
-    // setTimeout(async () => {
+    setTimeout(async () => {
     // In the general case, we need to make sure we get back solutions in the
     // right order. But we happen to know that will happen in this case.
     if (this.fileInput) {
-      this.finishedSolving(await solveState(this.currentToSolve));
+      this.finishedSolving(await (await worker).solveState(this.currentToSolve));
     } else {
-      this.finishedSolving(await solveScramble(this.currentToSolve));
-    }
+      this.finishedSolving(await (await worker).solveScramble(this.currentToSolve));
+    }}, 0);
   }
 
   startedSolving(): void {
