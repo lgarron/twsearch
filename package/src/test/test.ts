@@ -1,82 +1,81 @@
-import {setKPuzzle, solveScramble, solveState} from "../twsearch"
+import { setKPuzzle, solveScramble, solveState } from "../twsearch";
 import { algCubingNetLink, parse } from "cubing/alg";
 
-const twsfile = `Name PuzzleGeometryPuzzle
+const lastDefinition = "";
+const definitionField = document.querySelector(
+  ".definition"
+) as HTMLInputElement;
 
-Set CORNER 8 3
+class SolverSection {
+  private section: HTMLDivElement;
+  private toSolveField: HTMLInputElement;
+  private solveButton: HTMLButtonElement;
+  private solutionField: HTMLInputElement;
+  private viewLink: HTMLAnchorElement;
+  private viewLinkButton: HTMLButtonElement;
+  private currentToSolve: string;
+  constructor(selector: string, private fileInput: boolean) {
+    this.section = document.querySelector(selector);
+    this.toSolveField = this.section.querySelector(
+      ".to-solve"
+    ) as HTMLInputElement;
+    this.solveButton = this.section.querySelector(
+      ".solve"
+    ) as HTMLButtonElement;
+    this.solutionField = this.section.querySelector(
+      ".solution"
+    ) as HTMLInputElement;
+    this.viewLink = this.section.querySelector(".view") as HTMLAnchorElement;
+    this.viewLinkButton = this.viewLink.querySelector(
+      "button"
+    ) as HTMLButtonElement;
 
-Solved
-CORNER
-1 2 3 4 5 6 7 8
-0 0 0 0 0 0 0 0
-End
+    this.solveButton.addEventListener("click", this.onStartSolve.bind(this));
+  }
 
-Move F
-CORNER
-7 1 3 2 5 6 4 8
-2 1 0 2 0 0 1 0
-End
+  async onStartSolve(): Promise<void> {
+    const def = definitionField.value;
+    if (def != lastDefinition) {
+      await setKPuzzle(def);
+    }
+    this.currentToSolve = this.toSolveField.value;
+    console.log(this.section.offsetWidth);
+    this.startedSolving();
+    // setTimeout(async () => {
+    // In the general case, we need to make sure we get back solutions in the
+    // right order. But we happen to know that will happen in this case.
+    if (this.fileInput) {
+      this.finishedSolving(await solveState(this.currentToSolve));
+    } else {
+      this.finishedSolving(await solveScramble(this.currentToSolve));
+    }
+  }
 
-Move B
-CORNER
-1 2 5 4 8 3 7 6
-0 0 1 0 2 2 0 1
-End
+  startedSolving(): void {
+    this.solutionField.value = "";
+    this.solutionField.classList.add("solving");
+    this.viewLinkButton.hidden = true;
+  }
 
-Move D
-CORNER
-1 4 3 8 2 6 7 5
-0 0 0 0 0 0 0 0
-End
-
-Move U
-CORNER
-3 2 6 4 5 7 1 8
-0 0 0 0 0 0 0 0
-End
-
-Move L
-CORNER
-1 2 3 7 5 8 6 4
-0 0 0 1 0 1 2 2
-End
-
-Move R
-CORNER
-2 5 1 4 3 6 7 8
-1 2 2 0 1 0 0 0
-End
-`;
-
-const scrfile = `Scramble CornerTwist
-CORNER
-1 2 3 4 5 6 7 8
-1 2 0 0 0 0 0 0
-End
-`;
-
-setKPuzzle(twsfile);
+  finishedSolving(solution: string): void {
+    this.solutionField.classList.remove("solving");
+    this.solutionField.value = solution;
+    if (this.fileInput) {
+      this.viewLink.href = algCubingNetLink({
+        alg: parse(solution),
+        type: "reconstruction-end-with-setup",
+      });
+    } else {
+      this.viewLink.href = algCubingNetLink({
+        setup: parse(this.currentToSolve),
+        alg: parse(solution),
+      });
+    }
+    this.viewLinkButton.hidden = false;
+  }
+}
 
 window.addEventListener("DOMContentLoaded", () => {
-  const scrambleField = document.querySelector("#scramble") as HTMLInputElement;
-  const solveButton = document.querySelector("#solve") as HTMLButtonElement;
-  const solutionField = document.querySelector("#solution") as HTMLInputElement;
-  const viewLink = document.querySelector("#view") as HTMLAnchorElement;
-  solveButton.addEventListener("click", async () => {
-    const scramble = scrambleField.value;
-
-    solutionField.value = "";
-    solutionField.classList.add("solving");
-    viewLink.hidden = true;
-
-    const solution = await solveScramble(scramble);
-    solutionField.value = solution;
-
-    solutionField.classList.remove("solving");
-    viewLink.href = algCubingNetLink({
-      setup: parse(scramble),
-      alg: parse(solution)
-    })
-    viewLink.hidden = false;
-  })
-})
+  new SolverSection("#scramble-input", false);
+  new SolverSection("#file-input", true);
+});

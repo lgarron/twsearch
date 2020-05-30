@@ -1,0 +1,57 @@
+html, body {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  padding: 1em;
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  grid-template-rows: 3em 6em 1fr;
+  gap: 1rem;
+  box-sizing: border-box;
+}
+
+.solve-section {
+  display: grid;
+  grid-template-columns: auto 5em;
+  grid-template-rows: auto 2em;
+  gap: 0.5em;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  background: rgba(0, 0, 0, 0.1);
+  padding: 0.5em;
+}
+
+.title {
+  grid-column: 1 / 3;
+  display: grid;
+  font-size: 3em;
+  place-content: center center;
+}
+
+input, textarea {
+  padding: 0.25em 0.5em;
+}
+
+.definition {
+  grid-row: 2 / 4;
+}
+
+.solution.solving {
+  background-image: 
+    repeating-linear-gradient(
+      -45deg, 
+      transparent, 
+      transparent 1em,
+      rgba(0, 63, 255, 0.25) 1em,
+      rgba(0, 63, 255, 0.25) 2em
+    );
+  background-size: 2.8284271247em 2.8284271247em;
+  animation: solving 10s linear infinite;
+}
+
+@keyframes solving {
+  100% {
+    background-position: 141.421356237% 141.421356237%;
+  }
+}
