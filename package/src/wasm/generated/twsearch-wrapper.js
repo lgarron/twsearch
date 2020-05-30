@@ -19,26 +19,14 @@
 // can continue to use Module afterwards as well.
 var Module = typeof Module !== 'undefined' ? Module : {};
 
+import url from "url:./twsearch.wasm"
 
 // --pre-jses are emitted after the Module integration code, so that they can
 // refer to Module (if they choose; they can also define Module)
-const {readFileSync} = require("fs");
 
-const wasmFileContents = readFileSync(__dirname + "/twsearch.wasm", "binary");
-
-function stringToArrayBuffer(str) {
-  // Binary string to buffer
-  const buffer = new ArrayBuffer(str.length);
-  const byteView = new Uint8Array(buffer);
-  for (let i = 0; i < str.length; i++) {
-    byteView[i] = str.charCodeAt(i);
-  }
-  return buffer;
-}
-
-Module.wasmBinary = stringToArrayBuffer(wasmFileContents);
-
-
+Module.wasmBinary = new Promise(async (resolve) => {
+  resolve((await fetch(url)).arrayBuffer());
+});
 
 // Sometimes an existing Module object exists with properties
 // meant to overwrite the default module functionality. Here
@@ -1657,10 +1645,10 @@ if (!isDataURI(wasmBinaryFile)) {
   wasmBinaryFile = locateFile(wasmBinaryFile);
 }
 
-function getBinary() {
+async function getBinary() {
   try {
     if (wasmBinary) {
-      return new Uint8Array(wasmBinary);
+      return new Uint8Array(await wasmBinary);
     }
 
     if (readBinary) {
