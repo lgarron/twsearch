@@ -1,4 +1,4 @@
-import "babel-polyfill";
+import "regenerator-runtime/runtime"
 import { TwSearch } from "../twsearch";
 import { algCubingNetLink, parse } from "cubing/alg";
 

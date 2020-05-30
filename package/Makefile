@@ -1,6 +1,6 @@
 .PHONY: build
 build: node_modules wasm
-	npx parcel build --public-url ./ src/test/index.html
+	npx parcel build --public-url "https://experiments.cubing.net/twsearch.js" src/test/index.html
 
 .PHONY: dev
 dev: node_modules wasm

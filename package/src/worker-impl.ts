@@ -1,3 +1,4 @@
+import "regenerator-runtime/runtime"
 
 // We need to use the default import due to `node` limitations.
 // @ts-nocheck
