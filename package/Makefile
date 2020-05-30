@@ -5,7 +5,7 @@ dev: node_modules wasm
 # Set as `.PHONY` in order to rely on the parent dependency calculations.
 .PHONY: wasm
 wasm:
-	cd .. && make package/src/generated/js/twsearch-wrapper.js
+	cd .. && make package/src/wasm/generated/twsearch-wrapper.js
 
 node_modules:
 	npm install

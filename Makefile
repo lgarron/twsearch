@@ -1,6 +1,6 @@
 default: twsearch
 
-all: twsearch package/src/generated/js/twsearch-wrapper.js
+all: twsearch package/src/wasm/generated/twsearch-wrapper.js
 
 CXXFLAGS = -O3 -Wextra -Wall -pedantic -std=c++14 -g -march=native -Wsign-compare
 COMMON_FLAGS = -DHAVE_FFSLL -Isrc -Isrc/cityhash/src
@@ -25,18 +25,17 @@ BINARY_FLAGS = $(COMMON_FLAGS) -DUSE_PTHREADS
 twsearch: $(CSOURCE) $(HSOURCE)
 	$(CXX) $(CXXFLAGS) $(BINARY_FLAGS) -o twsearch $(CSOURCE) $(CITYSRC) $(LDFLAGS)
 
-package/src/generated/js/twsearch-wrapper.js: $(CSOURCE) $(HSOURCE)
-	mkdir -p package/src/wasm/generated/temp
+package/src/wasm/generated/twsearch-wrapper.js: $(CSOURCE) $(HSOURCE) package/src/wasm/patches/prefix.js package/src/wasm/patches/suffix.js
+	mkdir -p package/src/wasm/generated/
 	em++ $(WASM_CXX) $(CXXFLAGS) $(COMMON_FLAGS) \
 		-s ALLOW_MEMORY_GROWTH=1 -fno-exceptions -DWASM -DASLIBRARY \
-		-o package/src/wasm/generated/temp/twsearch.js $(CSOURCE) $(CITYSRC)
-	cat package/src/wasm/patches/prefix.js > package/src/wasm/generated/temp/twsearch.concatenated.js
-	cat package/src/wasm/generated/temp/twsearch.js >> package/src/wasm/generated/temp/twsearch.concatenated.js
-	cat package/src/wasm/patches/suffix.js >> package/src/wasm/generated/temp/twsearch.concatenated.js
-	mv package/src/wasm/generated/temp/twsearch.concatenated.js package/src/wasm/generated/twsearch.js
-	mv package/src/wasm/generated/temp/twsearch.wasm package/src/wasm/generated/twsearch-wrapper.wasm
-	rm -rf package/src/wasm/generated/temp/
+		--pre-js package/src/wasm/patches/prefix.js \
+		--post-js package/src/wasm/patches/suffix.js \
+		-o package/src/wasm/generated/twsearch.js $(CSOURCE) $(CITYSRC)
+		mv package/src/wasm/generated/twsearch.js package/src/wasm/generated/twsearch-wrapper.js
 
-	rm -f \
+.PHONY: clean
+clean:
+	rm -rf \
 		./twsearch \
-		./package/src/generated/*
+		./package/src/wasm/generated/

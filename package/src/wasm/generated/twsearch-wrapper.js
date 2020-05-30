@@ -1,19 +1,3 @@
-const {readFileSync} = require("fs");
-
-const wasmFileContents = readFileSync(__dirname + "/twsearch.wasm", "binary");
-
-function stringToArrayBuffer(str) {
-  // Binary string to buffer
-  const buffer = new ArrayBuffer(str.length);
-  const byteView = new Uint8Array(buffer);
-  for (let i = 0; i < str.length; i++) {
-    byteView[i] = str.charCodeAt(i);
-  }
-  return buffer;
-}
-
-Module = {};
-Module.wasmBinary = stringToArrayBuffer(wasmFileContents);
 /**
  * @license
  * Copyright 2010 The Emscripten Authors
@@ -38,7 +22,23 @@ var Module = typeof Module !== 'undefined' ? Module : {};
 
 // --pre-jses are emitted after the Module integration code, so that they can
 // refer to Module (if they choose; they can also define Module)
-// {{PRE_JSES}}
+const {readFileSync} = require("fs");
+
+const wasmFileContents = readFileSync(__dirname + "/twsearch.wasm", "binary");
+
+function stringToArrayBuffer(str) {
+  // Binary string to buffer
+  const buffer = new ArrayBuffer(str.length);
+  const byteView = new Uint8Array(buffer);
+  for (let i = 0; i < str.length; i++) {
+    byteView[i] = str.charCodeAt(i);
+  }
+  return buffer;
+}
+
+Module.wasmBinary = stringToArrayBuffer(wasmFileContents);
+
+
 
 // Sometimes an existing Module object exists with properties
 // meant to overwrite the default module functionality. Here
@@ -5444,3 +5444,4 @@ module.exports = {
   w_solvescramble: onceInitialized(cwrap('w_solvescramble', 'string', ['string'])),
   w_solveposition: onceInitialized(cwrap('w_solveposition', 'string', ['string'])),
 };
+

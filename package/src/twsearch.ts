@@ -1,4 +1,5 @@
 // We need to use the default import due to `node` limitations.
+// @ts-nocheck
 import {w_args, w_setksolve, w_solvescramble, w_solveposition} from "./wasm/generated/twsearch-wrapper"
 import {KPuzzle} from "cubing/kpuzzle";
 

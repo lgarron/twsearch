@@ -12,5 +12,4 @@ function stringToArrayBuffer(str) {
   return buffer;
 }
 
-Module = {};
 Module.wasmBinary = stringToArrayBuffer(wasmFileContents);
