@@ -2,4 +2,4 @@
 /.parcel-cache
 /dist
 /node_modules
-/src/generated
+/src/wasm/generated
