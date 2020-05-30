@@ -1,39 +1,61 @@
-import "../twsearch"
+import {setKPuzzle, solveScramble, solveState} from "../twsearch"
 
-// import { instantiateBarebones, instantiateStub } from "../instantiate";
-// import { TwSearch } from "../twsearch";
-// import { twsearchBytes, wasmtestBytes } from "../wasm-bytes";
+const twsfile = `Name PuzzleGeometryPuzzle
 
-// document.querySelector("#wasmtest-barebones")!.addEventListener("click", async () => {
-//   const instance = instantiateBarebones(wasmtestBytes);
-//   const twsearch = new TwSearch(await instance);
-//   await twsearch.main();
-// })
+Set CORNER 8 3
 
-// document.querySelector("#wasmtest-stub")!.addEventListener("click", async () => {
-//   const instance = instantiateStub(wasmtestBytes);
-//   const twsearch = new TwSearch(await instance);
-//   await twsearch.main();
-// })
+Solved
+CORNER
+1 2 3 4 5 6 7 8
+0 0 0 0 0 0 0 0
+End
 
-// // document.querySelector("#wasmtest-wasmer")!.addEventListener("click", async () => {
-// //   instantiateWasmerAndRunMain(wasmtestBytes, {runMain: true});
-// // })
+Move F
+CORNER
+7 1 3 2 5 6 4 8
+2 1 0 2 0 0 1 0
+End
 
-// document.querySelector("#twsearch-barebones")!.addEventListener("click", async () => {
-//   const instance = instantiateBarebones(twsearchBytes)
-//   const twsearch = new TwSearch(await instance);
-//   await twsearch.args("--nowrite");
-// })
+Move B
+CORNER
+1 2 5 4 8 3 7 6
+0 0 1 0 2 2 0 1
+End
 
-// document.querySelector("#twsearch-stub")!.addEventListener("click", async () => {
-//   const instance = instantiateStub(twsearchBytes)
-//   const twsearch = new TwSearch(await instance);
-//   await twsearch.args("--nowrite");
-// })
+Move D
+CORNER
+1 4 3 8 2 6 7 5
+0 0 0 0 0 0 0 0
+End
 
-// // document.querySelector("#twsearch-wasmer")!.addEventListener("click", async () => {
-// //   const instance = instantiateWasmerAndRunMain(twsearchBytes, {runMain: false});
-// //   const twsearch = new TwSearch(await instance);
-// //   await twsearch.args("--nowrite");
-// // })
+Move U
+CORNER
+3 2 6 4 5 7 1 8
+0 0 0 0 0 0 0 0
+End
+
+Move L
+CORNER
+1 2 3 7 5 8 6 4
+0 0 0 1 0 1 2 2
+End
+
+Move R
+CORNER
+2 5 1 4 3 6 7 8
+1 2 2 0 1 0 0 0
+End
+`;
+
+const scrfile = `Scramble CornerTwist
+CORNER
+1 2 3 4 5 6 7 8
+1 2 0 0 0 0 0 0
+End
+`;
+
+(async () => {
+  await setKPuzzle(twsfile);
+  console.log(await solveScramble("U F R D B L U F R D B L U F R D B L"));
+  console.log(await solveState(scrfile));
+})();

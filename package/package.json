@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "dependencies": {
     "@wasmer/wasmfs": "^0.11.2",
+    "cubing": "^0.10.4",
     "parcel": "^2.0.0-nightly.276"
   },
   "devDependencies": {
